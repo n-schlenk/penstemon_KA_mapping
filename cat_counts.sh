@@ -5,8 +5,8 @@
 
 
 #!/bin/bash
-N=$(cat $1 | wc -l)																	                                  # determine number of lines
-for i in $(seq 1 $N)
+N=$(cat $1 | wc -l)
+for i in $(seq 1 $N)                                                                  # for i in 1 until the last line in the input...
 do
     A=$(awk '{print $1}' $1 | head -n $i | tail -n 1)                                 # extract one ID
     B=$(grep -c $A $1)                                                                # determine number of duplicates for ID
