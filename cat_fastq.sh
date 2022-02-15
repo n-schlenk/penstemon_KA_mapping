@@ -1,7 +1,8 @@
 #!/bin/bash
 mkdir cat_edits                                                             # make directory for concatenated fastq files
 A=$(awk '{print $1}' $1 | uniq )                                            # assemble file with one ID per line, no duplicates
-for i in {1..6}
+N=$(awk '{print $1}' $1 | uniq | sed '/^$/d' | wc -l)                       # calculate number of unique IDs
+for i in $(seq 1 $N)                                                        # start loop from 1 to last unique ID in list
 do
     B=$(echo $A | cut -d ' ' -f $i)                                         # define ID within loop
     C=$(grep $B $1 | awk '{print $3}')                                      # extract location(s) for ID
@@ -21,6 +22,6 @@ do
         G=$(echo $C | cut -d ' ' -f 3)
         cat ./$E'_edits/'$B'.trimmed_R1_.fastq.gz' ./$F'_edits/'$B'.trimmed_R1_.fastq.qz' ./$G'_edits/'$B'.trimmed_R1_.fastq.gz' > ./cat_edits/$B'_cat_edits_trimmed_R1_.fastq.gz'
     else
-        echo $B has more than 3 duplicates                                  # this could go on forever
+        echo $B has more than 3 duplicates                                  # this could go on forever, change if needed
     fi
 done
