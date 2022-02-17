@@ -13,6 +13,6 @@ do
     B=$(head -n $i $1 | tail -n 1 | awk '{print $2}')   # extract read count
     if [[ $B -lt $2 ]]
     then
-        echo $A $B > not_enough_reads.txt                # print ID and count to file if count is less than given threshold
+        echo $A $B >> not_enough_reads.txt              # print ID and count to file if count is less than given threshold
     fi
 done
