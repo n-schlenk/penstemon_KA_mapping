@@ -1,14 +1,9 @@
-# this script takes every fastq edit file for every unique ID and combines them into one directory, each ID in one cat file
-# ID_counts_locations.txt contains each ID, read count, and location
+# this script takes every fastq edit file for every unique ID and combines, each ID in one cat file
+# ID.txt contains each ID once
 
 #!/bin/bash
-ID=$(awk '{print $1}' ID_counts_locations.txt | uniq)                               # each unique ID
-for i in $ID                                                                        # for every unique ID...
+for i in $(cat ID.txt)
 do
-    LOC=$(grep "$i" ID_counts_locations.txt | awk '{print $3}' | uniq)              # grab i ID's location
-    for j in $LOC                                                                   # for every location of i ID...
-    do
-        A=$(ls ./cat_edits/$j'_edits' | grep "$i")                                  # grab the filename with i ID in j location
-        cat ./cat_edits/$j'_edits/'$A >> ./edits/$i'.trimmed_allcat_R1_.fastq.gz'   # add that file to cat file i ID
-    done
+    A=$(find -name "$i.*.gz")
+    cat $A >> $i'.cat.fastq.gz'
 done
