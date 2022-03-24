@@ -1,2 +1,2 @@
 # KA_mapping_project
-Scripts used to generate recombination map from RNA Sequence data
+Scripts used to generate recombination map from MSG sequence data
