@@ -23,7 +23,8 @@ do
     bwa mem kunthii /home/n752s925/scratch/fin_edits/KA_edits/$i > /home/n752s925/scratch/BWA/$ID'_bwa_output.sam'
     java -jar /home/n752s925/scratch/picard.jar AddOrReplaceReadGroups I=/home/n752s925/scratch/BWA/$ID'_bwa_output.sam' O=/home/n752s925/scratch/BWA/$ID'_withRG.sam'
     samtools view -b /home/n752s925/scratch/BWA/$ID'_withRG.sam' | samtools sort > /home/n752s925/scratch/BWA/$ID'.bam'
-    java -jar /home/n752s925/scratch/picard.jar MarkDuplicates /home/n752s925/scratch/BWA/$ID'.bam' > /home/n752s925/scratch/BWA/$ID'_sortedRGMD.bam'
+    # java -jar /home/n752s925/scratch/picard.jar MarkDuplicates /home/n752s925/scratch/BWA/$ID'.bam' > /home/n752s925/scratch/BWA/$ID'_sortedRGMD.bam'
+    samtools index $ID'.bam'
 done
 
 
