@@ -1,0 +1,1 @@
+ bcftools filter -i 'GT[@id_file]="AR" | GT[@id_file]="RR"' copy.vcf >> filter_1.vcf
