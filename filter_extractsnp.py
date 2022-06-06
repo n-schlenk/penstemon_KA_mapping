@@ -1,3 +1,6 @@
+# created by JKK and Carrie
+# modified by N. Schlenk
+
 #! /usr/bin/env python3
 
 in2a = open('output_findbestsnp.txt', 'r')
