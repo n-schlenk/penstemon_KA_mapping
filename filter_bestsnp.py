@@ -5,8 +5,6 @@
 # assumes you've already filtered for quality
 # modified by N. Schlenk
 
-
-
 MinMinor = 8            # min individuals that will have minor allele
 
 vcf = open('output_carrie.vcf', 'r')
