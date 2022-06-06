@@ -1,7 +1,6 @@
 # call variants on BAM files, output one VCF
 # created by N. Schlenk
 
-
 #!/bin/bash
 
 module load bcftools
