@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # created by Carrie on 10/7/17
-# edited by Noelle on 6/6/22
+# edited by N. Schlenk
 
 from numpy import median
 from numpy import mean
