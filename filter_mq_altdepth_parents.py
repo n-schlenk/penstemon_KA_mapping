@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
-# code by Carrie, edited by Noelle
+# created by Carrie
+# edited by N. Schlenk
+
 import os
 import re
 
