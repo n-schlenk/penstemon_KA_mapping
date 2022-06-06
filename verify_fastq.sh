@@ -1,4 +1,4 @@
-# this script takes every fastq edit file for every unique ID and combines, each ID in one cat file
+# this script takes every filtered and demultiplexed fastq file for each unique ID and combines them, each ID in one cat file
 # ID.txt contains each ID once
 -------------------------------------------------------------------------------------------------
 #!/bin/bash
@@ -10,7 +10,7 @@ done
 
 
 # INPUT 2 arguments
-  # file with ID (no dups) and count reads (cat)
+  # file with IDs (no dups) in one columns and total read count in the other
   # minimum read threshold
 # OUTPUT 1 file
   # file with ID and count reads that did not meet threshold
