@@ -1,6 +1,12 @@
 #! /usr/bin/env python3
 # created by Carrie
 # edited by N. Schlenk
+# filters vcf for sites that fulfill the following criteria:
+    # both parents have a called genotype
+    # neither parent is a het
+    # parents are not identical
+    # there are enough calls for the SNP (defined by minIndiv)
+# parental columns should be the last 2 of the vcf
 
 import os
 import re
