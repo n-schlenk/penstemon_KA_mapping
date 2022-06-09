@@ -6,6 +6,7 @@
     # neither parent is a het
     # parents are not identical
     # there are enough calls for the SNP (defined by minIndiv)
+    # MQ score at SNP is high enough (defined by minMQ)
 # parental columns should be the last 2 of the vcf
 
 import os
