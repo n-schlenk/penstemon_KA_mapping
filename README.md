@@ -9,8 +9,21 @@ Scripts used to generate recombination map from MSG sequence data.
 ## Demultiplex and Filter
 |||
 |-----|-----|
-|Starts with:|FASTQ file and barcode file (one per sequencing plate or lane)|
-|Ends with:|FASTQ file (one per ID), raw and edited stats files (one per plate/lane)|
+|Starts with:|FASTQ (seq output), TXT (barcodes)|
+|Ends with:|FASTQ (concatenated by ID), TXT (stats)|
+
 ```
 testing testing
 ```
+
+## Align to Reference Genome
+|||
+|-----|-----|
+|Starts with:|FASTQ (one per ID), FASTA (ref genome)|
+|Ends with:|BAM (one per ID)|
+
+## Call Variants
+|||
+|-----|-----|
+|Starts with:|BAM (one per ID)|
+|Ends with:|VCF (single)|
