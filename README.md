@@ -21,6 +21,13 @@ Then, submit the job (recommended sbatch to cluster)
 conda activate msg_ipyrad
 ipyrad -p [parameter file] -s 12 -c 1 -f
 ```
+##### Flags and parameters:
+```
+ipyrad -n [title]                       creates new parameter file, which must be manually edited
+ipyrad -s 12                            only complete steps 1 and 2 of ipyrad workflow (demultiplex, filter)
+ipyrad -c 1                             print results (if you sbatch, these will end up in the serial_test file)
+ipyrad -f                               forces ipyrad to run steps, even if they have already been completed (applies when some data is missing)                         
+```
 
 ## Align to Reference Genome
 |||
