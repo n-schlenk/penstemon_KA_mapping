@@ -8,8 +8,9 @@ Steps include demultiplexing/filtering, aligning to reference genome, variant ca
 - samtools
 - bcftools
 - java
+- python3
 
-##### Required files
+##### Required files:
 - picard.jar (attached)
 - Lep-MAP3 (download from SourceForge)
 
