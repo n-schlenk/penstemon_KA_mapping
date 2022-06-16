@@ -71,3 +71,30 @@ bcftools call -m                         use alterate model for multiallelic and
 bcftools -O v                            output to uncompressed VCF
 ```
 
+## Lep-MAP3
+|||
+|-----|-----|
+|Starts with:|VCF, TXT (pedigree)|
+|Ends with:|TXT (genetic map coordinates)|
+##### Workflow:
+```
+java -cp [filepath to Lep-MAP3 bin] is required before each step so that the server knows where to pull Lep-MAP3 information
+```
+```
+ParentCall2 data=[pedigree TXT] vcfFile=[VCF] > [parentcalled VCF]
+Filtering2 data=[parentcalled VCF] > [filtered VCF]
+SeparateChromosomes2 data=[filtered VCF] > [map TXT]
+JoinSingles2All map=[map TXT] data=[filtered VCF] > [joined map TXT]
+OrderMarkers2 map=[joined map TXT] data=[filtered VCF] > [final map TXT]
+```
+##### Flags and parameters:
+```
+Filtering2 removeNonInfomative=1            removes markers that are monomorphic or homozygous for both parents
+Filtering2 dataTolerance=0.0000001          removes distorted markers at give p-value threshold (applies HWE)
+SeparateChromosomes2 lodLimit=5             separates linkage groups based on LOD limit (markers with LOD higher than the provided limit are grouped together)
+JoinSingles2All lodLimit=4                  distributes singles into existing linkage groups using a less strict LOD limit
+OrderMarkers2 chromosome=1                  orders markers within linkage groups (sometimes it is easier to do this one linkage group at a time, thus the chromosome flag)
+OrderMarkers2 sexAveraged=1                 cM values for markers are averaged between sexes
+OrderMarkers2 grandparentPhase=1            phases data with consideration to the presence of grandparents in the dataset
+OrderMarkers2 evaluateOrder=[previously ordered map] should only be used on a pre-existing ordered map. It is recommended that this step is run on your compeleted ordered map to produce a more confident ordering. I typically do this 2-5 times.
+```
