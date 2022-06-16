@@ -71,6 +71,28 @@ bcftools call -m                         use alterate model for multiallelic and
 bcftools -O v                            output to uncompressed VCF
 ```
 
+## Additional Filtering (optional)
+|||
+|-----|-----|
+|Starts with:|VCF|
+|Ends with:|better VCF|
+##### Filters (complete in order):
+```
+python filter_mq_aldepth_parents.py                     removes markers with low MQ score, low call counts, more than one alt allele, and those which display noninformative/unexpected parental genotypes (parental genotypes must be the last 2 columns)
+python filter_bestsnp.py | filter_extractsnp.py         filters VCF for best SNPs per radtag (assumes that you have already filtered for quality)
+python filter_hwe.py                                    removes markers that deviate from HWE or display extreme allele frequencies
+python filter_refparent.py                              removes markers where the parental genotype of the genome species is not homozygous for the ref allele
+```
+##### Parameters:
+`````
+filter_mq_aldepth_parents.py                            minIndiv = 50 (minimum number of called genotypes at the SNP)      
+filter_mq_aldepth_parents.py                            minMQ = 30 (minimum MQ score for the SNP)
+filter_bestsnp.py                                       MinMinor = 8 (number of individuals that will have the minor allele)
+filter_hwe.py                                           minHWE = 0.0001 (minimum p-value of Chi2 test for HWE)
+filter_hwe.py                                           minq = 0.3 (minimum value of alt allele frequency)
+filter_hwe.py                                           maxq = 0.7 (maximum value of alt allele frequency)
+`````
+
 ## Lep-MAP3
 |||
 |-----|-----|
