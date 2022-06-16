@@ -4,7 +4,7 @@ Scripts used to generate recombination map from MSG sequence data.
 - Parent 2 = Penstemon amphorellae, not inbred
 - F1 (not included) = Cross between kunthii and amphorellae
 - F2 (298) = Selfed F1s 
-Steps include demultiplexing/filtering, aligning to reference genome, variant calling, and generating map with Lep-MAP3.
+
 ##### Required software:
 - bioconda (to install msg_ipyrad environment)
 - anaconda
