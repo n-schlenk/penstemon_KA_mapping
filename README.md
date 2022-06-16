@@ -1,10 +1,17 @@
 # KA_mapping_project
 Scripts used to generate recombination map from MSG sequence data.  
-1. Demultiplex and filter    
-2. Align to reference genome
-3. Call variants  
-4. Filter
-5. LepMap  
+Steps include demultiplexing/filtering, aligning to reference genome, variant calling, and generating map with Lep-MAP3.
+##### Required software:
+- bioconda (to install msg_ipyrad environment)
+- anaconda
+- bwa
+- samtools
+- bcftools
+- java
+
+##### Required files
+- picard.jar (attached)
+- Lep-MAP3 (download from SourceForge)
 
 ## Demultiplex and Filter
 |||
