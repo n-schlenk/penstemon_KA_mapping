@@ -3,21 +3,24 @@
 # index resulting BAM file
 # created by N. Schlenk
 
-#!/bin/bash
 module load bwa
 module load java
 module load picard
 module load samtools
 
-bwa index -p kunthii /home/n752s925/scratch/BWA/PGA_assembly_trimmed.fasta
-for i in $(ls /home/n752s925/scratch/fin_edits/KA_edits)
+bwa index -p kunthii PGA_assembly_trimmed.fasta
+for i in $(ls KA_fastqs/)
 do
     ID=$(echo $i | grep -Po '^.{5}')
-    bwa mem kunthii /home/n752s925/scratch/fin_edits/KA_edits/$i > /home/n752s925/scratch/BWA/$ID'_bwa_output.sam'
-    java -jar /home/n752s925/scratch/picard.jar AddOrReplaceReadGroups I=/home/n752s925/scratch/BWA/$ID'_bwa_output.sam' O=/home/n752s925/scratch/BWA/$ID'_withRG.sam'
-    samtools view -b /home/n752s925/scratch/BWA/$ID'_withRG.sam' | samtools sort > /home/n752s925/scratch/BWA/$ID'.bam'
-    # java -jar /home/n752s925/scratch/picard.jar MarkDuplicates /home/n752s925/scratch/BWA/$ID'.bam' > /home/n752s925/scratch/BWA/$ID'_sortedRGMD.bam'
-    samtools index $ID'.bam'
+    bwa mem kunthii KA_fastqs/$i > $ID'_bwa_output.sam'
+    java -jar picard.jar AddOrReplaceReadGroups \
+        I=$ID'_bwa_output.sam'\
+        O=$ID'_withRG.sam' \
+        RGLB=$ID \
+        RGPL=ILLUMINA \
+        RGPU=barcode \
+        RGSM=$ID
+    samtools view -b $ID'_withRG.sam' | samtools sort > bam_files/$ID'.bam'
 done
 
 
