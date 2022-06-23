@@ -1,6 +1,7 @@
+#! /bin/bash
 # index reference genome, align each fastq to reference genome (results in SAM file)
-# AddOrReplaceReadGroups, translate to BAM, sort, optional MarkDuplicates
-# index resulting BAM file
+# AddOrReplaceReadGroups, translate to BAM, sort
+# fastq files must be in 'KA_fastqs' directory
 # created by N. Schlenk
 
 module load bwa
@@ -20,7 +21,7 @@ do
         RGPL=ILLUMINA \
         RGPU=barcode \
         RGSM=$ID
-    samtools view -b $ID'_withRG.sam' | samtools sort > bam_files/$ID'.bam'
+    samtools view -b $ID'_withRG.sam' | samtools sort > $ID'.bam'
 done
 
 
