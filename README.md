@@ -76,17 +76,20 @@ bcftools call -m                         use alterate model for multiallelic and
 bcftools -O v                            output to uncompressed VCF
 ```
 
-## Additional Filtering (optional)
+## Additional Filtering
 |||
 |-----|-----|
-|Starts with:|VCF|
+|Starts with:|VCF, pedigree|
 |Ends with:|better VCF|
+java -cp [filepath to Lep-MAP3 bin] is required before ParentCall2 and Filtering2 because they require Lep-MAP3 information
 ##### Filters (complete in order):
 ```
 python filter_mq_aldepth_parents.py                     removes markers with low MQ score, low call counts, more than one alt allele, and those which display noninformative/unexpected parental genotypes (parental genotypes must be the last 2 columns)
 python filter_bestsnp.py | filter_extractsnp.py         filters VCF for best SNPs per radtag (assumes that you have already filtered for quality)
 python filter_hwe.py                                    removes markers that deviate from HWE or display extreme allele frequencies
 python filter_refparent.py                              removes markers where the parental genotype of the genome species is not homozygous for the ref allele
+java -cp [LM filepath] ParentCall2 data=[pedigree TXT] vcfFile=[VCF] > [parentcalled VCF]
+java -cp [LM filepath] Filtering2 data=[parentcalled VCF] > [filtered VCF]
 ```
 ##### Parameters:
 `````
@@ -96,32 +99,22 @@ filter_bestsnp.py                                       MinMinor = 8 (number of 
 filter_hwe.py                                           minHWE = 0.0001 (minimum p-value of Chi2 test for HWE)
 filter_hwe.py                                           minq = 0.3 (minimum value of alt allele frequency)
 filter_hwe.py                                           maxq = 0.7 (maximum value of alt allele frequency)
+Filtering2 removeNonInfomative=1                        removes markers that are monomorphic or homozygous for both parents
+Filtering2 dataTolerance=0.0000001                      removes distorted markers at give p-value threshold (applies HWE)
 `````
 
-## Lep-MAP3
+## Map
 |||
 |-----|-----|
-|Starts with:|VCF, TXT (pedigree)|
-|Ends with:|TXT (genetic map coordinates)|
+|Starts with:|filtered VCF|
+|Ends with:|genetic map coordinates for each scaffold|
 ##### Workflow:
 ```
-java -cp [filepath to Lep-MAP3 bin] is required before each step so that the server knows where to pull Lep-MAP3 information
+sh separate_scaffold filtered.vcf                       generates VCF and map file for each scaffold
+OrderMarkers2 evaluateOrder=[map file for 1 scaffold] data=[VCF for 1 scaffold] > [final map for 1 scaffold]
 ```
+##### Additional Arguments:
 ```
-ParentCall2 data=[pedigree TXT] vcfFile=[VCF] > [parentcalled VCF]
-Filtering2 data=[parentcalled VCF] > [filtered VCF]
-SeparateChromosomes2 data=[filtered VCF] > [map TXT]
-JoinSingles2All map=[map TXT] data=[filtered VCF] > [joined map TXT]
-OrderMarkers2 map=[joined map TXT] data=[filtered VCF] > [final map TXT]
-```
-##### Flags and parameters:
-```
-Filtering2 removeNonInfomative=1            removes markers that are monomorphic or homozygous for both parents
-Filtering2 dataTolerance=0.0000001          removes distorted markers at give p-value threshold (applies HWE)
-SeparateChromosomes2 lodLimit=5             separates linkage groups based on LOD limit (markers with LOD higher than the provided limit are grouped together)
-JoinSingles2All lodLimit=4                  distributes singles into existing linkage groups using a less strict LOD limit
-OrderMarkers2 chromosome=1                  orders markers within linkage groups (sometimes it is easier to do this one linkage group at a time, thus the chromosome flag)
-OrderMarkers2 sexAveraged=1                 cM values for markers are averaged between sexes
-OrderMarkers2 grandparentPhase=1            phases data with consideration to the presence of grandparents in the dataset
-OrderMarkers2 evaluateOrder=[previously ordered map] should only be used on a pre-existing ordered map. It is recommended that this step is run on your compeleted ordered map to produce a more confident ordering. I typically do this 2-5 times.
+OrderMarkers2 sexAveraged=1                             cM values for markers are averaged between sexes
+OrderMarkers2 improveOrder=0                            calculate cM values with the orders in which SNPs are aligned
 ```
