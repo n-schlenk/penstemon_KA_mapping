@@ -12,8 +12,8 @@
 import os
 import re
 
-invcf = open('KA_called_nodup.vcf', 'r')                                # define input file, output file, number F2s and min individuals to call a genotype at a locus
-outfile = open('output_filter1.vcf', 'w')
+invcf = open([VCF]], 'r')                                               # define input file, output file, number F2s and min individuals to call a genotype at a locus
+outfile = open([filtered VCF], 'w')
 nF2s = 298
 minIndiv = 50
 
