@@ -7,8 +7,8 @@ from numpy import mean
 from numpy import sum
 from scipy.stats import chi2
 
-in1 = open('KA_called_5.vcf', 'r')
-outfile = open('output_hwe.vcf', 'w')
+in1 = open('[VCF]', 'r')
+outfile = open('[HWE-filtered VCF]', 'w')
 
 nF2s = 298
 nsamples = nF2s + 2
