@@ -13,6 +13,8 @@ Scripts used to generate recombination map from MSG sequence data.
 - bcftools
 - java
 - python3
+- NumPy
+- SciPy
 
 ##### Required files:
 - picard.jar (attached)
