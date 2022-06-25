@@ -5,8 +5,8 @@
 import re
 import os
 
-vcf = open('KA_called_filtered.vcf', 'r')
-outvcf = open('KA_called_filter2.vcf', 'w')
+vcf = open([VCF], 'r')
+outvcf = open([filtered VCF], 'w')
 
 nF2s = 298
 
