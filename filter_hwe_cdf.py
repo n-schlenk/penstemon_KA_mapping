@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # created by Carrie on 10/7/17
-# edited by N. Schlenk
+# modified by N. Schlenk
 
 from numpy import median
 from numpy import mean
@@ -10,14 +10,14 @@ from scipy.stats import chi2
 in1 = open('[VCF]', 'r')
 outfile = open('[HWE-filtered VCF]', 'w')
 
-nF2s = 298
+nF2s = 147
 nsamples = nF2s + 2
 minq = 0.3
 maxq = 0.7
 minHWE = 0.0001
 
 for line in in1:
-    cols = line.replace('\n', '').split('\t')
+    cols = line.split('\t')
     if len(cols) < 2:
         pass
     elif cols[0] == '#CHROM':
@@ -27,13 +27,13 @@ for line in in1:
         pos = cols[1]
         totREF = 0
         totALT = 0
-        calls = 0  
+        calls = 0
         reads = []
         RRcount = 0
         RAcount = 0
         AAcount = 0
-        for j in range(9, 9+nsamples):
-            fields = cols[j].split(':')    
+        for j in range(9, nsamples+1):
+            fields = cols[j].split(':')
             if fields[0] != './.':
                 calls += 1
                 alleleDepths = fields[2].split(',')
@@ -51,7 +51,7 @@ for line in in1:
         sumRPI = sum(reads)
         freqRR = float(RRcount) / calls
         freqRA = float(RAcount) / calls
-        freqAA = float(AAcount) / calls  
+        freqAA = float(AAcount) / calls
         freqR = freqRR + 0.5 * freqRA
         freqA = freqAA + 0.5 * freqRA
         expRR = calls * freqR * freqR
@@ -74,3 +74,5 @@ for line in in1:
         if pvalue >= minHWE and (minq <= freqR <= maxq):
             outfile.write(line)
 outfile.close()
+
+
