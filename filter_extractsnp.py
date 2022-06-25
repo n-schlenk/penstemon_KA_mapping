@@ -1,11 +1,10 @@
+#! /usr/bin/env python3
 # created by JKK and Carrie
 # modified by N. Schlenk
 
-#! /usr/bin/env python3
-
-in2a = open('output_findbestsnp.txt', 'r')
-vcf = open('output_carrie.vcf', 'r')
-outfile = open('output_thinbestsnp.vcf', 'w')
+in2a = open([output findbestsnp], 'r')
+vcf = open([VCF], 'r')
+outfile = open([filtered VCF], 'w')
 
 bestlist = []
 for line in in2a:
