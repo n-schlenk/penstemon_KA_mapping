@@ -5,8 +5,8 @@
 import re
 import os
 
-vcf=open('KA_called_filter2.vcf', 'r')
-outfile=open('map_all/geno_plot_all.csv', 'w')
+vcf=open('[VCF]', 'r')
+outfile=open('[CSV]', 'w')
 
 nF2s = 298
 
