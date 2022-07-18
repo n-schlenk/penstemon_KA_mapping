@@ -120,3 +120,13 @@ OrderMarkers2 evaluateOrder=[map file for 1 scaffold] data=[VCF for 1 scaffold] 
 OrderMarkers2 sexAveraged=1                             cM values for markers are averaged between sexes
 OrderMarkers2 improveOrder=0                            calculate cM values with the orders in which SNPs are aligned
 ```
+
+### Graph
+|||
+|-----|-----|
+|Starts with:|map coordinates|
+|Ends with:|scatterplots|
+##### Workflow:
+```
+code here
+```
