@@ -1,51 +1,67 @@
 #! /usr/bin/env python3
+# written by N. Schlenk
+# input map coordinates, output plot of 8 scaffolds
+
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import numpy as np
-import os
-import re
+import matplotlib.ticker as ticker
 
-x1 = []
-y1 = []
-mn = []
-ch_bp = []
-mn2 = []
-mn_cm = []
+co0 = open('plot2/coords0_v2.txt', 'r')
+co1 = open('plot2/coords1_v2.txt', 'r')
+co2 = open('plot2/coords2_v2.txt', 'r')
+co3 = open('plot2/coords3_v2.txt', 'r')
+co4 = open('plot2/coords4_v2.txt', 'r')
+co5 = open('plot2/coords5_v2.txt', 'r')
+co6 = open('plot2/coords6_v2.txt', 'r')
+co7 = open('plot2/coords7_v2.txt', 'r')
 
-with open("lod9_ordered_sexavg.txt", "r") as ordered:           # open file with marker number and position in cM
-    for line in ordered:
-        x = re.findall("^[0-9]*\w", line)                       # add marker number to mn
-        if x != []:
-            mn.append(x)                       
-with open("edit_fil.vcf", "r") as filtered:                     # open file with marker positions in db
-    for line in filtered:
-        y = line.split()
-        ch_bp.append(y[0:2])                                    # add marker chromosome and position to ch_bp
+co = [co0, co1, co2, co3, co4, co5, co6, co7]
 
-for i in mn:                                                    # fix mn list to only contain integers
-    a = str(i)
-    b = len(a)
-    mn2.append(a[2:b-2])
+dict = {}
+for i in range(8):
+    dict.setdefault(i, ([], []))
+    for n, scaffold in enumerate(co):
+        if n == i:
+            for line2 in scaffold:
+                dict[i][0].append(int(line2.split()[0]))
+                dict[i][1].append(float(line2.split()[1]))
 
-with open("lod9_ordered_sexavg.txt", "r") as ordered:           # open file with marker number and position in cM
-    for line in ordered:
-        z = line.split()
-        mn_cm.append(z[0:2])                                    # add marker number and position to mn_cm
 
-for i in mn_cm:                                                 # create x variable from marker position (bp)
-    j = int(i[0])                                               # create y variable from marker position (M)
-    k = ch_bp[j-1]
-    l = float(i[1])
-    m = int(l)
-    x1.append(k[1])
-    y1.append(m)
-    
-# fig, ax = plt.subplots()
-# ax.set_title("Linkage Group 1")
-# ax.set_xlabel("Marker Position (bp)")
-# ax.set_ylabel("Marker Position (M)")
-# ax.scatter(x1, y1)
-# plt.show()
 
-for index, x in enumerate(x1):
-    print(x, y1[index])
+
+
+fig, ax = plt.subplots(4, 2, sharex = 'col', sharey = 'row', constrained_layout = True)
+ax[0, 0].scatter(dict[0][0], dict[0][1], alpha = 0.3, c = 'darkblue')
+ax[1, 0].scatter(dict[1][0], dict[1][1], alpha = 0.3, c = 'darkblue')
+ax[2, 0].scatter(dict[2][0], dict[2][1], alpha = 0.3, c = 'darkblue')
+ax[3, 0].scatter(dict[3][0], dict[3][1], alpha = 0.3, c = 'darkblue')
+ax[3, 0].set_xticks([0, 10000000, 20000000, 30000000, 40000000, 50000000, 60000000, 70000000])
+ax[3, 0].set_xticklabels(['0', '10', '20', '30', '40', '50', '60', '70'])
+ax[3, 0].xaxis.set_minor_locator(ticker.MultipleLocator(5000000))
+ax[0, 1].scatter(dict[4][0], dict[4][1], alpha = 0.3, c = 'darkblue')
+ax[1, 1].scatter(dict[5][0], dict[5][1], alpha = 0.3, c = 'darkblue')
+ax[2, 1].scatter(dict[6][0], dict[6][1], alpha = 0.3, c = 'darkblue')
+ax[3, 1].scatter(dict[7][0], dict[7][1], alpha = 0.3, c = 'darkblue')
+ax[3, 1].set_xticks([0, 10000000, 20000000, 30000000, 40000000, 50000000])
+ax[3, 1].set_xticklabels(['0', '10', '20', '30', '40', '50'])
+ax[3, 1].xaxis.set_minor_locator(ticker.MultipleLocator(5000000))
+ax[0, 0].yaxis.set_major_locator(ticker.MultipleLocator(50))
+ax[1, 0].yaxis.set_major_locator(ticker.MultipleLocator(50))
+ax[2, 0].set_yticks([0, 50, 100, 150], ['0', '', '100', ''])
+ax[3, 0].yaxis.set_major_locator(ticker.MultipleLocator(50))
+ax[0, 0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+ax[1, 0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+ax[2, 0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+ax[3, 0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+fig.supxlabel('Distance (Mbp)')
+fig.supylabel('Distance (cM)')
+fig.suptitle('Linkage Map by Chromosome')
+ax[0, 0].set_title('Chromosome 1', fontsize = 10)
+ax[1, 0].set_title('Chromosome 2', fontsize = 10)
+ax[2, 0].set_title('Chromosome 3', fontsize = 10)
+ax[3, 0].set_title('Chromosome 4', fontsize = 10)
+ax[0, 1].set_title('Chromosome 5', fontsize = 10)
+ax[1, 1].set_title('Chromosome 6', fontsize = 10)
+ax[2, 1].set_title('Chromosome 7', fontsize = 10)
+ax[3, 1].set_title('Chromosome 8', fontsize = 10)
+plt.show()
+
