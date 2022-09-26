@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 # created by N. Schlenk
+# words
 # use values from calc_genfreq.py to plot exp vs obs gen freq
 
 import re
