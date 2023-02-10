@@ -8,13 +8,12 @@ last_scaffold=7
 
 for i in $(eval echo {$first_scaffold..$last_scaffold})
 do
-    grep '##' $1 > scaffold_$i'.vcf'
-    SNP_count1=$(grep scaffold$i $1 | wc -l)
-    SNP_count2=$(($SNP_count1 - 1))
-    grep scaffold$i $1 | tail -n $SNP_count2 >> scaffold_$i'.vcf'
-    for n in $(eval echo {1..$SNP_count1})
+    rm map_scaffold$i'.txt'
+    head -n7 $1 > scaffold_$i'.vcf'
+    SNP_count=$(grep scaffold$i $1 | wc -l)
+    grep scaffold$i $1 >> scaffold_$i'.vcf'
+    for n in $(eval echo {1..$SNP_count})
     do
         echo $n >> map_scaffold_$i'.txt'
     done
 done
-
