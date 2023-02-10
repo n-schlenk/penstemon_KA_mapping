@@ -83,6 +83,7 @@ bcftools -O v                            output to uncompressed VCF
 |-----|-----|
 |Starts with:|VCF, pedigree|
 |Ends with:|better VCF|
+
 java -cp [filepath to Lep-MAP3 bin] is required before ParentCall2 and Filtering2 because they require Lep-MAP3 information
 ##### Filters (complete in order):
 ```
