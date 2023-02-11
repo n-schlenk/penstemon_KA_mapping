@@ -88,22 +88,19 @@ java -cp [filepath to Lep-MAP3 bin] is required before ParentCall2 and Filtering
 ##### Filters (complete in order):
 ```
 python filter_mq_aldepth_parents.py                     removes markers with low MQ score, low call counts, more than one alt allele, and those which display noninformative/unexpected parental genotypes (parental genotypes must be the last 2 columns)
-python filter_bestsnp.py | filter_extractsnp.py         filters VCF for best SNPs per radtag (assumes that you have already filtered for quality)
-python filter_hwe.py                                    removes markers that deviate from HWE or display extreme allele frequencies
 python filter_refparent.py                              removes markers where the parental genotype of the genome species is not homozygous for the ref allele
-java -cp [LM filepath] ParentCall2 data=[pedigree TXT] vcfFile=[VCF] > [parentcalled VCF]
-java -cp [LM filepath] Filtering2 data=[parentcalled VCF] > [filtered VCF]
+python filter_bestsnp.py | filter_extractsnp.py         filters VCF for best SNPs per radtag (assumes that you have already filtered for quality)
+head -n37 unfiltered.vcf > pre_pc.vcf                   add original headers back to VCF before using ParentCall2
+cat filtered.vcf >> pre_pc.vcf
+java -cp <LM filepath> ParentCall2 data=pedigree.txt vcfFile=filtered.vcf > pc.vcf
+
 ```
 ##### Parameters:
 `````
 filter_mq_aldepth_parents.py                            minIndiv = 50 (minimum number of called genotypes at the SNP)      
 filter_mq_aldepth_parents.py                            minMQ = 30 (minimum MQ score for the SNP)
-filter_bestsnp.py                                       MinMinor = 8 (number of individuals that will have the minor allele)
-filter_hwe.py                                           minHWE = 0.0001 (minimum p-value of Chi2 test for HWE)
-filter_hwe.py                                           minq = 0.3 (minimum value of alt allele frequency)
-filter_hwe.py                                           maxq = 0.7 (maximum value of alt allele frequency)
-Filtering2 removeNonInfomative=1                        removes markers that are monomorphic or homozygous for both parents
-Filtering2 dataTolerance=0.0000001                      removes distorted markers at give p-value threshold (applies HWE)
+filter_bestsnp.py                                       MinMinor = 1 (number of individuals that will have the minor allele)
+ParentCall2 removeNonInfomative=1                       removes markers that are monomorphic or homozygous for both parents
 `````
 
 ## Map
@@ -113,8 +110,9 @@ Filtering2 dataTolerance=0.0000001                      removes distorted marker
 |Ends with:|genetic map coordinates for each scaffold|
 ##### Workflow:
 ```
-sh separate_scaffold filtered.vcf                       generates VCF and map file for each scaffold
-OrderMarkers2 evaluateOrder=[map file for 1 scaffold] data=[VCF for 1 scaffold] > [final map for 1 scaffold]
+sh separate_scaffold called_filtered.vcf                generates VCF and map file for each scaffold
+OrderMarkers2 evaluateOrder=<map file for 1 scaffold> data=<VCF for 1 scaffold> > <final map for 1 scaffold>
+python get_coords.py                                    generates coordinates for output of OrderMarkers2 (per scaffold)
 ```
 ##### Additional Arguments:
 ```
