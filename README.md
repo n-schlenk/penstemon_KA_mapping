@@ -110,7 +110,7 @@ ParentCall2 removeNonInfomative=1                       removes markers that are
 |Ends with:|genetic map coordinates for each scaffold|
 ##### Workflow:
 ```
-sh separate_scaffold called_filtered.vcf                generates VCF and map file for each scaffold
+sh separate_scaffold filtered.vcf                       generates VCF and map file for each scaffold
 OrderMarkers2 evaluateOrder=<map file for 1 scaffold> data=<VCF for 1 scaffold> > <final map for 1 scaffold>
 python get_coords.py                                    generates coordinates for output of OrderMarkers2 (per scaffold)
 ```
@@ -120,11 +120,11 @@ OrderMarkers2 sexAveraged=1                             cM values for markers ar
 OrderMarkers2 improveOrder=0                            calculate cM values with the orders in which SNPs are aligned
 ```
 
-### Graph
+### Pre-Graphing
 |||
 |-----|-----|
 |Starts with:|map coordinates|
-|Ends with:|scatterplots|
+|Ends with:|data for plotting|
 ##### Workflow:
 ```
 code here
