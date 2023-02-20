@@ -106,12 +106,13 @@ ParentCall2 removeNonInfomative=1                       removes markers that are
 ## Map
 |||
 |-----|-----|
-|Starts with:|filtered VCF|
+|Starts with:|filtered and parentcalled VCF|
 |Ends with:|genetic map coordinates for each scaffold|
 ##### Workflow:
 ```
-sh separate_scaffold filtered.vcf                       generates VCF and map file for each scaffold
-OrderMarkers2 evaluateOrder=<map file for 1 scaffold> data=<VCF for 1 scaffold> > <final map for 1 scaffold>
+sh separate_scaffold filtered_parentcalled.vcf          generates VCF and map file for each scaffold
+sh ordermarkers.sh                                      applies Lep-MAP3 OrderMarkers2 on each scaffold
+python 
 python get_coords.py                                    generates coordinates for output of OrderMarkers2 (per scaffold)
 ```
 ##### Additional Arguments:
