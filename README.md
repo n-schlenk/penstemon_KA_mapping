@@ -128,5 +128,7 @@ OrderMarkers2 improveOrder=0                            calculate cM values with
 |Ends with:|data for plotting|
 ##### Workflow:
 ```
-code here
+python find_gc_per_chr.py                                 input fastas, output txt files with GC content per <bin> 
+python find_repeats_per_chr.py                            input stockholm file (RepeatModeler) and target repeat element family, output repeat element count per <bin>
+
 ```
