@@ -112,7 +112,7 @@ ParentCall2 removeNonInfomative=1                       removes markers that are
 ```
 sh separate_scaffold filtered_parentcalled.vcf          generates VCF and map file for each scaffold
 sh ordermarkers.sh                                      applies Lep-MAP3 OrderMarkers2 on each scaffold
-python 
+python parentcall_reformat.py                           create new reference VCF from parentcalled VCF file
 python get_coords.py                                    generates coordinates for output of OrderMarkers2 (per scaffold)
 ```
 ##### Additional Arguments:
