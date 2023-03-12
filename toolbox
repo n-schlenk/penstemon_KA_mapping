@@ -1,0 +1,491 @@
+import os
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import matplotlib.patches as mpatches
+import numpy as np
+
+
+class FilteringOrdering:
+    def __init__(self, nF2s = 238, scaffold_index = 12, infile_path = None, outfile_path = None, dir = 'LM'):
+        if infile_path == None:
+            print('Must enter a filepath for your input.')
+            quit()
+        if os.path.isfile(infile_path) == False:
+            print('File does not exist: ' + infile_path)
+            quit()
+        if outfile_path != None and os.path.isfile(outfile_path) == True:
+            a = input('This file already exists! Do you want to continue? (y/n)' + '\t')
+            if a == 'n':
+                quit()
+        try:
+            self.id = str(id)
+            self.nF2s = int(nF2s)
+            self.scaffold_index = int(scaffold_index)
+            self.infile_path = str(infile_path)
+            self.outfile_path = str(outfile_path)
+            self.dir = str(dir)
+            os.makedirs(self.dir)       
+        except TypeError:
+            print('NF2s must be an integer.')
+            quit()
+        except FileExistsError:
+            pass
+    def MQADPAR(self, minIndiv = 50, minMQ = 30): # input VCF, output filtered VCF
+        if self.outfile_path == None:
+            outfile = open(self.dir + '/mqadpar.vcf', 'w')
+        else:
+            outfile = open(self.dir + '/' + self.outfile_path, 'w')
+        for line in self.infile:
+            try:
+                mq_score = [float(val.split('=')[1]) for val in line.split('\t')[7].split(';') if val.split('=')[0] == 'MQ'][0]
+                alt_allele = line.split('\t')[4].split(',')
+                if mq_score >= minMQ and len(alt_allele) == 1:
+                    calls = 0
+                    for i in range(9, 11 + self.nF2s):
+                        if len(line.split('\t')[i].split(':')) < 3:
+                            pass
+                        else:
+                            calls += 1
+                    p1= line.replace('\n','').split('\t')[self.nF2s + 9].split(':')
+                    p2 = line.replace('\n','').split('\t')[self.nF2s + 10].split(':')
+                    if p1[0] != './.' and p2[0] != './.' and p1[0] != '0/1' and p2[0] != '0/1' and p1[0] != p2[0] and p1[0] != '0/0' and p2[0] != '1/1' and calls > minIndiv:
+                        outfile.write(line)
+            except IndexError:
+                if line[0] == '#':
+                    outfile.write(line)
+                else:
+                    pass
+    def BestSNP(self, minMinor = 1): # input VCF, output filtered VCF
+        infile = open(self.infile_path, 'r')        
+        if self.outfile_path == None:
+            outfile = open(self.dir + '/bestsnp.vcf', 'w')        
+        else:
+            outfile = open(self.outfile_path, 'w')
+        scaffold = ''
+        position = ''
+        last_scaffold = ''
+        last_position = 0
+        cp = 0
+        for line in infile:
+            try:
+                if line[0] == '#':
+                    outfile.write(line)
+                else:
+                    scaffold = line.split('\t')[0]
+                    position = int(line.split('\t')[1])                 
+                    count_genos = [0, 0, 0]
+                    raw_genos = [line.replace('\n','').split('\t')[i].split(':')[0] for i in range(9, self.nF2s + 11) if line.replace('\n','').split('\t')[i].split(':')[0] != './.']
+                    count_genos[0] = raw_genos.count('0/0')
+                    count_genos[1] = raw_genos.count('0/1')
+                    count_genos[2] = raw_genos.count('1/1')
+                    mincc = min(count_genos[0] + count_genos[1], count_genos[2], count_genos[1])
+                    if scaffold != last_scaffold or (position - last_position) > 150:
+                        if cp >= minMinor:
+                            outfile.write(best_snp)
+                            cp = mincc
+                            last_scaffold = scaffold
+                            last_position = position
+                            best_snp = str(line)
+                        elif mincc > cp and position != last_position:
+                            cp = mincc
+                            best_snp = str(line)
+            except TypeError:
+                pass
+            except IndexError:
+                pass        
+        if cp >= minMinor:
+            outfile.write(best_snp)
+    def ParentDepth(self): # input VCF, output filtered VCF
+        infile = open(self.infile_path, 'r')
+        if self.outfile_path == None:
+            outfile = open(self.dir + '/filtered_parent.vcf', 'w')
+        else:
+            outfile = open(self.outfile_path, 'w')
+        for line in infile:
+            if line[0] == '#' or line[0:3] == 'CHR':
+                outfile.write(line)
+            else:
+                p1 = line.replace('\n','').split('\t')[self.nF2s + 9].split(':')[-1].split(',')
+                p2 = line.replace('\n','').split('\t')[self.nF2s + 10].split(':')[-1].split(',')
+                if p1[0] == '0' and p2[1] == '0' and int(p1[1]) >= 70 and int(p2[0]) >= 70:
+                    outfile.write(line)
+        outfile.close()
+    def ParentCall(self, lepmap_filepath = '~/Lep-MAP3/bin', pedigree_filepath = 'pedigree.txt'): # input VCF, output parentcalled VCF
+        infile = open(self.infile_path, 'r')
+        if outfile_path == None:
+            outfile_path = self.directory + '/parentcalled.vcf'
+            outfile = open(self.outfile_path, 'w')
+        else:
+            outfile = open(self.outfile_path, 'w')
+        for line in infile:
+            if line[0] == '#':
+                outfile.write(line)
+        outfile.close()
+        outstring = str('java -cp ' + lepmap_filepath + ' ParentCall2 data=' + pedigree_filepath + ' vcfFile=' + self.infile_path + ' removeNonInformative = 1 >> ' + self.outfile_path)
+        os.system(outstring)
+    def MakeVCF(self, inref_path): # input parentcalled VCF and most recent filtered VCF, output re-formatted parentcalled VCF
+        invcf = open(self.infile_path, 'r')
+        inref = open(inref_path, 'r')
+        if self.outfile_path == None:
+            outfile = open(self.dir + '/filtered.vcf', 'w')
+        else:
+            outfile = open(self.outfile_path, 'w')
+        snp_dict = {}
+        for line in invcf:
+            if line[0] != '#':
+                snp_dict.setdefault(line.split('\t')[0], [])
+                snp_dict[line.split('\t')[0]].append(line.split('\t')[1])
+        for line in inref:
+            if line[0] == '#':
+                outfile.write(line)
+            if line.split('\t')[0] in snp_dict.keys() and line.split('\t')[1] in snp_dict[line.split('\t')[0]]:
+                outfile.write(line)
+        inref.close()
+        invcf.close()
+        outfile.close()   
+    def OrderMarkers(self, lepmap_filepath = '~/Lep-MAP3/bin', vcf_dir = 'vcfs', map_dir = 'maps', order_dir = 'orders'): # input original parentcalled VCF, output per-scaffold VCFs, maps, and orders
+        infile = open(self.infile_path, 'r')
+        try:
+            for item in [vcf_dir, map_dir, order_dir]:
+                os.makedirs(self.dir + '/' + item)
+        except FileExistsError:
+            pass
+        headers = []
+        snp_dict = {}
+        for line in infile:
+            try:
+                if line[0] == '#' or line[0:3] == 'CHR':
+                    headers.append(str(line.replace('\n','')))
+                elif int(line[self.scaffold_index]) == int(line[self.scaffold_index]):
+                    snp_dict.setdefault(line[self.scaffold_index], [])
+                    snp_dict[line[self.scaffold_index]].append(line.split('\t')[1])            
+                    if len(snp_dict[line[self.scaffold_index]]) == 1:
+                        if len(snp_dict.keys()) == 1:
+                            scaffold_vcf = open(self.dir + '/vcfs/scaffold' + str(line[self.scaffold_index]) + '.vcf', 'w')
+                            scaffold_map = open(self.dir + '/maps/scaffold' + str(line[self.scaffold_index]) + '.txt', 'w')                    
+                        else:
+                            scaffold_vcf.close()
+                            scaffold_map.close()
+                            scaffold_vcf = open(self.dir + '/vcfs/scaffold' + str(line[self.scaffold_index]) + '.vcf', 'w')
+                            scaffold_map = open(self.dir + '/maps/scaffold' + str(line[self.scaffold_index]) + '.txt', 'w')      
+                        order_index = 0                                  
+                        for header in headers:
+                            scaffold_vcf.write(header + '\n')                    
+                    order_index += 1
+                    scaffold_vcf.write(line)
+                    scaffold_map.write(str(order_index) + '\n')
+            except ValueError:
+                print('Funky line!' + '\n' + line)
+        scaffold_vcf.close()
+        scaffold_map.close()
+        for i in snp_dict.keys():
+            map_path = self.dir + '/maps/scaffold' + str(i) + '.txt'
+            vcf_path = self.dir + '/vcfs/scaffold' + str(i) + '.vcf'
+            outfile_path = self.dir + '/orders/scaffold' + str(i) + '.txt'
+            outstring = str('java -cp ' + lepmap_filepath + ' OrderMarkers2 evaluateOrder=' + map_path + ' data=' + vcf_path + ' sexAveraged=1 improveOrder=0 >> ' + outfile_path)
+            os.system(outstring)    
+
+
+class PlotPrep:
+    def __init__(self, nF2s = 238, scaffold_index = 12, bin = 1000000, scaffold_length_index = 7, vcf_dir = 'vcfs', order_dir = 'orders', dir = 'LM'):
+        try:
+            self.nF2s = int(nF2s)
+            self.scaffold_index = int(scaffold_index)
+            self.scaffold_length_index = int(scaffold_length_index)
+            self.bin = int(bin)
+            self.dir = str(dir)
+            self.vcf_dir = str(vcf_dir)
+            self.order_dir = str(order_dir)
+            os.makedirs(self.dir)
+        except TypeError:
+            print('NF2s must be an integer')
+            quit()
+        except FileExistsError:
+            pass
+    def GetCoords(self, coords_dir = 'coords'): # input per-scaffold VCF directory and per-scaffold order directory, output coordinates in coordinate directory
+        try:
+            os.makedirs(self.dir + '/' + coords_dir)
+        except FileExistsError:
+            pass
+        invcfs = [filepath for filepath in os.listdir(self.dir + '/' + self.vcf_dir) if filepath[0:8] == 'scaffold' and 'vcf' in filepath.split('.')]
+        inords = [filepath for filepath in os.listdir(self.dir + '/' + self.order_dir) if filepath[0:8] == 'scaffold' and 'txt' in filepath.split('.')]
+        bp = {}
+        for vcf in invcfs:
+            scaffold = vcf[8]
+            bp.setdefault(scaffold, [])
+            infile = open(self.dir + '/' + self.vcf_dir + '/' + vcf, 'r')
+            for line in infile:
+                if line[0] != '#' and line.split()[0] != 'CHR':
+                    bp[scaffold].append(line.split()[1])
+            infile.close()
+        cm = {}
+        for ord in inords:
+            scaffold = ord[8]
+            cm.setdefault(scaffold, {})
+            infile = open(self.dir + '/' + self.order_dir + '/' + ord, 'r')
+            for line in infile:
+                if line[0] != '#' and len(line.split()) > 1:
+                    cm[scaffold].setdefault(line.split()[0], line.split()[1])
+            infile.close()
+        for key in bp.keys():
+            if len(cm[key]) != len(bp[key]):
+                print('Files do not align! Too many markers!')
+                quit()
+            else:
+                outfile = open(self.dir + '/' + coords_dir + '/scaffold' + str(key) + '.txt', 'w')
+                for idx, cms in cm[key].items():
+                    outfile.write(str(bp[key][int(idx) - 1]) + '\t' + str(cms) + '\n')
+                outfile.close()
+    def GetSNPDensity(self, snpden_dir = 'snpden'): # input per-scaffold VCF directory, output snp densities in snpden directory
+        invcfs = [file for file in os.listdir(self.dir + '/' + self.vcf_dir) if file[0:8] == 'scaffold' and 'vcf' in file.split('.')]
+        try:
+            os.makedirs(self.dir + '/' + snpden_dir)
+        except FileExistsError:
+            pass
+        for vcf in invcfs:
+            snp_list = []
+            scaffold = vcf[8]
+            infile = open(self.dir + '/' + self.vcf_dir + '/' + vcf, 'r')
+            outfile = open(self.dir + '/' + snpden_dir + '/scaffold' + str(scaffold) + '.txt', 'w')
+            for line in infile:
+                if line[0] != '#' and line[0:3] != 'CHR':
+                    scaffold_len = int(line.split('_')[self.scaffold_length_index].split()[0])
+                    snp_list.append(int(line.split('\t')[1]))
+            for i in range(0, scaffold_len, self.bin):
+                x = [marker for marker in snp_list if marker > i and marker <= i + self.bin]
+                outfile.write(str(len(x)) + '\n')
+            outfile.close()
+            print('Linkage Group ' + str(scaffold) + ' has ' + str(len(snp_list)) + ' SNPs')
+    def SplitFASTA(self, infasta_path = 'fastas/PGA_assembly_trimmed.fasta', fasta_dir = 'fastas'): # input fasta, output per-scaffold fastas in fastas directory
+        try:
+            os.makedirs(self.dir + '/' + fasta_dir)
+        except FileExistsError:
+            pass
+        with open(infasta_path, 'r') as infile:
+            done = []
+            for line in infile:
+                if line[0] == '>':
+                    done.append(line[self.scaffold_index + 1])
+                    if len(done) > 1:
+                        outfile.close()
+                    outfile = open(self.dir + '/' + fasta_dir + '/scaffold' + str(line[self.scaffold_index + 1]) + '.fasta', 'w')
+                    outfile.write(line)                   
+                else:
+                    outfile.write(line)
+        outfile.close()
+    def GetGCContent(self, fasta_dir = 'march11/fastas', gc_dir = 'gc'): # input per-scaffold fasta directory, output gc-content in gc directory
+        try:
+            os.makedirs(self.dir + '/' + str(gc_dir))
+        except FileExistsError:
+            pass
+        infastas = [file for file in os.listdir(fasta_dir) if 'fasta' in file.split('.') and file[0:8] == 'scaffold']
+        for fasta in infastas:
+            tot = 0
+            gc = 0
+            n = 0
+            infile = open(fasta_dir + '/' + fasta, 'r')
+            outfile = open(self.dir + '/' + gc_dir + '/scaffold' + fasta[8] + '.txt', 'w')
+            for line in infile:
+                if line[0] != '>' and len(line.replace('\n','')) > 0:
+                    for nuc in line.replace('\n',''):
+                        n += 1
+                        if nuc in ['G', 'C', 'g', 'c']:
+                            gc += 1
+                        if nuc in ['G', 'C', 'A', 'T', 'g', 'c', 'a', 't']:
+                            tot += 1
+                        if n % self.bin == 0:
+                            outfile.write(str(round(gc/tot, 4)) + '\n')
+                            tot = 0
+                            gc = 0
+            outfile.write(str(round(gc/tot, 4)))
+            outfile.close()
+    def GetRE(self, stk_path = 'feb_kunthii-families.stk', target = 'Gypsy'): # input STK and repeat element, output per-scaffold repeat element counts in directory
+        try:
+            os.makedirs(self.dir + '/' + target.lower())
+        except FileExistsError:
+            pass
+        infile = open(stk_path, 'r')
+        x = 0
+        n_families = 0
+        count = 0
+        re_dict = {}
+        le_dict = {}      
+        for line in infile:
+            if line[0:7] == '#=GF TP':
+                if target in line.replace('\n','').split(';'):
+                    x = 1
+                    n_families += 1
+                else:
+                    x = 0
+            if x == 1 and line[0] != '#' and len(line.split('_')) > 5:
+                le_dict[line[self.scaffold_index]] = int(line.split('_')[self.scaffold_length_index].split(':')[0])
+                re_dict.setdefault(line[self.scaffold_index], [])
+                re_dict[line[self.scaffold_index]].append(line.split(':')[1].split('-')[0])
+                count += 1
+        print(str(count) + ' ' + str(target) + ' repeat elements detected across a total of ' + str(n_families) + ' families')
+        for key in sorted(re_dict.keys()):
+            print('Linkage Group ' + str(key) + ' contains ' + str(len(re_dict[key])) + ' ' + str(target) + ' elements')
+            with open(self.dir + '/' + target.lower() + '/scaffold' + str(key) + '.txt', 'w') as outfile:
+                for i in range(0, le_dict[key], self.bin):
+                    x = [element for element in re_dict[key] if int(element) > i and int(element) <= i + self.bin]
+                    outfile.write(str(len(x)) + '\n')
+    def CalculateHWE(self, per_chr = True, infile_path = None): # input VCF with genotype information (not from OrderMarkers), output genotype frequencies to terminal
+        if infile_path == None:
+            print('Must enter a filepath for your input.')
+            quit()
+        if os.path.isfile(infile_path) == False:
+            print('File does not exist: ' + infile_path)
+            quit()
+        counts = [0, 0, 0]
+        count_dict = {}
+        last_scaff = ''        
+        infile = open(infile_path, 'r')        
+        for n, line in enumerate(infile):
+            if line[0] != '#' and line[0:3] != 'CHR':
+                genotypes = [line.split('\t')[i].split(':')[0] for i in range(9, self.nF2s + 9) if line.split('\t')[i].split(':') != './.']
+                counts[0] += genotypes.count('0/0')
+                counts[1] += genotypes.count('0/1')
+                counts[2] += genotypes.count('1/1')
+                if per_chr == True:
+                    count_dict.setdefault(line[self.scaffold_index], [0, 0, 0])  
+                    if len(count_dict.keys()) > 1 and count_dict[line[self.scaffold_index]] == [0, 0, 0]:                    
+                        total = count_dict[last_scaff][0] + count_dict[last_scaff][1] + count_dict[last_scaff][2]
+                        print('Genotype frequencies for LG ' + str(last_scaff) + ':')
+                        print('AA : ' + str(count_dict[last_scaff][0]/total))
+                        print('AB : ' + str(count_dict[last_scaff][1]/total))
+                        print('BB : ' + str(count_dict[last_scaff][2]/total) + '\n')
+                    count_dict[line[self.scaffold_index]][0] += genotypes.count('0/0')
+                    count_dict[line[self.scaffold_index]][1] += genotypes.count('0/1')
+                    count_dict[line[self.scaffold_index]][2] += genotypes.count('1/1')                    
+                    last_scaff = line[self.scaffold_index]
+        total = counts[0] + counts[1] + counts[2]
+        print('TOTAL genotype frequencies:')
+        print('AA : ' + str(counts[0]/total))
+        print('AB : ' + str(counts[1]/total))
+        print('BB : ' + str(counts[2]/total))
+
+class PlotStuff:
+    def __init__(self, bin = 1000000, scaffold_index = 12, scaffold_length_index = 7, dir = 'LM', coords_dir = 'coords', vcf_dir = 'vcfs', order_dir = 'orders', snpden_dir = 'snpden', gc_dir = 'gc', fasta_dir = 'fastas', re_dir = 'gypsy', include = None, fig_out = None, colors = ['navy', 'mediumvioletred', 'blue', 'hotpink', 'violet', 'lightpink', 'green', 'lightblue'], labels = ['LG 7', 'LG 8', 'LG 3', 'LG 1', 'LG 4', 'LG 5', 'LG 6', 'LG 2'], lengths = [68081433, 67113551, 65712110, 57328190, 52746053, 52024118, 46780370, 43486057]):
+        self.bin = int(bin)
+        self.scaffold_index = int(scaffold_index)
+        self.scaffold_length_index = int(scaffold_length_index)
+        self.fig_out = fig_out
+        self.dir = str(dir)
+        self.coords_dir = str(coords_dir)
+        self.vcf_dir = str(vcf_dir)
+        self.order_dir = str(order_dir)
+        self.snpden_dir = str(snpden_dir)
+        self.gc_dir = str(gc_dir)
+        self.fasta_dir = str(fasta_dir)
+        self.re_dir = str(re_dir)
+        if type(include) != list:
+            print('You must enter a list!')
+            quit()
+        else:
+            self.include = include
+        self.cl = {str(scaff) : colors[int(scaff)] for scaff in include}
+        self.lb = {str(scaff) : labels[int(scaff)] for scaff in include}
+        self.ln = {str(scaff) : lengths[int(scaff)] for scaff in include}
+        self.cm = {str(scaff) : [] for scaff in include}
+        self.bp = {str(scaff) : [] for scaff in include}
+        self.sd = {str(scaff) : [] for scaff in include}
+        coord_files = [filepath for filepath in os.listdir(self.dir + '/' + self.coords_dir) if str(filepath[8]) in self.cm.keys()]
+        for coord_file in coord_files:
+            infile = open(self.dir + '/' + self.coords_dir + '/' + coord_file, 'r')
+            for line in infile:
+                if len(line.split('\t')) > 1:
+                    self.bp[str(coord_file[8])].append(float((int(line.replace('\n','').split('\t')[0]))/(self.bin)))
+                    self.cm[str(coord_file[8])].append(float(line.replace('\n','').split('\t')[1]))
+            infile.close()
+        snpden_files = [filepath for filepath in os.listdir(self.dir + '/' + self.snpden_dir) if str(filepath[8]) in self.sd.keys()]
+        for snpden_file in snpden_files:
+            infile = open(self.dir + '/' + self.snpden_dir + '/'+ snpden_file, 'r')
+            for line in infile:
+                if len(line) > 1:
+                    self.sd[str(snpden_file[8])].append(float(line.replace('\n','')))
+            infile.close()
+    def SlidingHWE(self, invcf_path = None): # input VCF with genotype information (not from OrderMarkers), generate plot with linkage maps, snpden, and allele frequencies per SNP
+        if invcf_path == None:
+            invcf = open(self.dir + '/filtered.vcf', 'r')
+        else:
+            invcf = open(invcf_path, 'r')
+        if self.fig_out == None:
+            fig_out = 'allelefreq_snps.png'
+        else:
+            fig_out = str(self.fig_out)
+        alt_freq = {str(scaff) : [] for scaff in self.include}
+        pos_dict = {str(scaff) : [] for scaff in self.include}
+        len_dict = {str(scaff) : 0 for scaff in self.include}
+        tot_alleles = []
+        for line in invcf:
+            if line[0] != '#' and str(line[self.scaffold_index]) in alt_freq.keys():
+                len_dict[str(line[self.scaffold_index])] = int(line.split('_')[self.scaffold_length_index].split()[0])
+                info = line.split('\t')[7]
+                for item in info.split(';'):
+                    if item.split('=')[0] == 'AC':
+                        ac = int(item.split('=')[1])
+                    if item.split('=')[0] == 'AN':
+                        an = int(item.split('=')[1])
+                tot_alleles.append(an)
+                pos = int(line.split('\t')[1])
+                alt_freq[str(line[self.scaffold_index])].append(ac/an)
+                pos_dict[str(line[self.scaffold_index])].append(pos/self.bin)
+        invcf.close()
+        fig, ax = plt.subplots(2 + len(self.include), sharex = True, gridspec_kw = {'height_ratios': [1, 0.4] + ([0.3] * len(self.include))})
+        xlim = float(int(max(len_dict.values()))/(self.bin))
+        patches = []
+        steps = 10
+        for n, scaff in enumerate(self.include):
+            ax[0].scatter(self.bp[str(scaff)], self.cm[str(scaff)], c = self.cl[str(scaff)], alpha = 0.2, s = 1)
+            ax[0].yaxis.set_major_locator(ticker.MultipleLocator(50))
+            ax[0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+            ax[1].hist([range(0, len(self.sd[str(scaff)]), 1)], weights = self.sd[str(scaff)], histtype = 'step', color = self.cl[str(scaff)], alpha = 0.7)
+            ax[1].xaxis.set_minor_locator(ticker.MultipleLocator(5))
+            ax[1].set_xticks(*[range(0, (8 * steps), steps)], ['0', '10', '20', '30', '40', '50', '60', '70'])
+            ax[1].set_xlim(-0.5, xlim + 1)
+            ax[2 + n].scatter(pos_dict[str(scaff)], alt_freq[str(scaff)], c = self.cl[str(scaff)], alpha = 0.4, s = 0.5)
+            ax[2 + n].set_yticks([0, 1])
+            ax[2 + n].yaxis.set_minor_locator(ticker.MultipleLocator(0.25))        
+            patches.append(mpatches.Patch(color = self.cl[str(scaff)], label = self.lb[str(scaff)]))
+        ax[0].legend(handles = patches)
+        plt.savefig(self.dir + '/' + fig_out)
+    def MainMap(self): # generate plot with linkage maps, snpden, gc-content, repeat element distributions
+        if self.fig_out == None:
+            fig_out = 'mainmap.png'
+        else:
+            fig_out = str(self.fig_out)
+        gc_dict = {str(scaffold) : [] for scaffold in self.include}
+        gc_paths = [filepath for filepath in os.listdir(self.dir + '/' + self.gc_dir) if int(filepath[8]) in self.include]
+        for gc_file in gc_paths:
+            infile = open(self.dir + '/' + self.gc_dir + '/' + gc_file, 'r')
+            for line in infile:
+                if len(line) > 0:
+                    gc_dict[str(gc_file[8])].append(float(line.replace('\n','')))
+            infile.close()
+        re_dict = {str(scaffold) : [] for scaffold in self.include}        
+        re_paths = [filepath for filepath in os.listdir(self.dir + '/' + self.re_dir) if int(filepath[8]) in self.include]
+        for re_file in re_paths:
+            infile = open(self.dir + '/' + self.re_dir + '/' + re_file, 'r')
+            for line in infile:
+                if len(line) > 0:
+                    re_dict[str(re_file[8])].append(float(line.replace('\n','')))
+            infile.close()
+        fig, ax = plt.subplots(2 + (2 * len(self.include)), sharex = True, gridspec_kw = {'height_ratios': [1, 0.3] + ([0.1, 0.1] * len(self.include))})
+        xlim = float(max([self.ln[str(scaffold)] for scaffold in self.include])) / self.bin
+        patches = []
+        steps = 10
+        for n, scaff in enumerate(self.include):
+            ax[0].scatter(self.bp[str(scaff)], self.cm[str(scaff)], c = self.cl[str(scaff)], alpha = 0.2, s = 1)
+            ax[0].yaxis.set_major_locator(ticker.MultipleLocator(50))
+            ax[0].yaxis.set_minor_locator(ticker.MultipleLocator(25))
+            ax[1].hist([range(0, len(self.sd[str(scaff)]), 1)], weights = self.sd[str(scaff)], histtype = 'step', color = self.cl[str(scaff)], alpha = 0.7)
+            ax[1].xaxis.set_minor_locator(ticker.MultipleLocator(5))
+            ax[1].set_xticks(*[range(0, (8 * steps), steps)], ['0', '10', '20', '30', '40', '50', '60', '70'])
+            ax[1].set_xlim(-0.5, xlim + 1)
+            ax[(2*n) + 2].imshow([gc_dict[str(scaff)]], cmap = 'plasma', aspect = 'auto', vmin = 0.3000, vmax = 0.4000)
+            ax[(2*n) + 3].imshow([re_dict[str(scaff)]], cmap = 'viridis', aspect = 'auto')
+            ax[(2*n) + 2].set_yticks([])
+            ax[(2*n) + 3].set_yticks([])
+            patches.append(mpatches.Patch(color = self.cl[str(scaff)], label = self.lb[str(scaff)]))
+        ax[0].legend(handles = patches)
+        plt.savefig(self.dir + '/' + fig_out) 
