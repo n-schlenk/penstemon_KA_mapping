@@ -1,10 +1,3 @@
-# KA_mapping_project
-Scripts used to generate recombination map from MSG sequence data.
-- Parent 1 = Penstemon kunthii, not inbred (same species as genome assembly)
-- Parent 2 = Penstemon amphorellae, not inbred
-- F1 (not included) = Cross between kunthii and amphorellae
-- F2 (298) = Selfed F1s 
-
 ##### Required software:
 - bioconda (to install msg_ipyrad environment)
 - anaconda
@@ -15,10 +8,10 @@ Scripts used to generate recombination map from MSG sequence data.
 - python3
 - NumPy
 - SciPy
+- Lep-MAP3 (download from SourceForge)
 
 ##### Required files:
 - picard.jar (attached)
-- Lep-MAP3 (download from SourceForge)
 
 ## Demultiplex and Filter
 |||
@@ -26,7 +19,7 @@ Scripts used to generate recombination map from MSG sequence data.
 |Starts with:|FASTQ (seq output), TXT (barcodes)|
 |Ends with:|FASTQ (concatenated by ID), TXT (stats)|
 ##### Workflow:
-First, you must install and load the msg_ipyrad module (I did this in a conda environment). Use this command to create parameters file.
+First, you must load the msg_ipyrad (bioconda) environment. Use this to create parameters file.
 ```
 ipyrad -n <title>
 ```
@@ -72,9 +65,9 @@ bcftools mpileup -a FORMAT/AD            # outputs allelic depth in addition to 
 bcftools mpileup --max-depth=100         # include a maximum of 100 reads per sample per SNP
 ```
 ```
-bcftools call -v                         output variant sites only 
-bcftools call -m                         use alterate model for multiallelic and rare-variant calling (recommended)
-bcftools -O v                            output to uncompressed VCF
+bcftools call -v                         # output variant sites only 
+bcftools call -m                         # use alterate model for multiallelic and rare-variant calling (recommended)
+bcftools -O v                            # output to uncompressed VCF
 ```
 
 ## Additional Filtering
