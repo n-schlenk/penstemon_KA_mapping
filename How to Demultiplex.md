@@ -106,5 +106,5 @@ demultiplex-plate1_fastqs
 
 In the **edits** folder, you will have all **trimmed R1 fastq.gz** files and a **stat** file, both of which are important. Keep everything from the **edits** folder.  In the **fastqs** folder, you will only need to keep the **stat** file. You can delete all of the **untrimmed/original quality fastq** files.  
 
-Move **everything** from the **edits** folder and the **stat** file from the **fastqs** folder to long-term storage (at KU, we used ResFS).  
+Move **everything** from the **edits** folder and the **stat** file from the **fastqs** folder to long-term storage (we use ResFS).  
 
