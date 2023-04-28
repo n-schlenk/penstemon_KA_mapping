@@ -13,12 +13,9 @@
 |Starts with:|FASTQ (seq output), TXT (barcodes)|
 |Ends with:|FASTQ (concatenated by ID), TXT (stats)|
 ##### Workflow:
-First, you must load the msg_ipyrad (bioconda) environment. Use this to create parameters file.
+First, you must load the msg_ipyrad (bioconda) environment. Use this to create parameters file. Then run/submit.
 ```
 ipyrad -n <title>
-```
-Then, submit the job (recommended sbatch to cluster)
-```
 ipyrad -p <parameter file> -s 12 -c 1 -f
 ```
 ##### Flags and parameters:
@@ -92,10 +89,11 @@ ParentCall2 removeNonInfomative=1                       # removes markers that a
 ## Step 5: Map
 |||
 |-----|-----|
-|Starts with:|filtered and parentcalled VCF|
+|Starts with:|filtered VCF|
 |Ends with:|genetic map coordinates for each scaffold|
 ##### Workflow:
 ```
+java -cp <LM filepath> ParentCall2 data=pedigree.txt vcfFile=filtered.vcf > pc.vcf
 sh separate_scaffold filtered_parentcalled.vcf          generates VCF and map file for each scaffold
 sh ordermarkers.sh                                      applies Lep-MAP3 OrderMarkers2 on each scaffold
 python parentcall_reformat.py                           create new reference VCF from parentcalled VCF file
