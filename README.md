@@ -1,19 +1,13 @@
-##### Required software:
-- bioconda (to install msg_ipyrad environment)
-- anaconda
-- bwa
-- samtools
-- bcftools
-- java
-- python3
-- NumPy
-- SciPy
-- Lep-MAP3 (download from SourceForge)
+## Project Overview
 
-##### Required files:
-- picard.jar (attached)
+**Title:** The _Penstemon kunthii_ draft genome: Integrating a genetic map with assembled sequence data  
+**Purpose:** To verify the existing _Penstemon kunthii_ genome assembly using a linkage map derived from a cross between _P. kunthii_ and _P. amphorellae_. This was my master's thesis project at the University of Kansas.  
+**Summary:** We generated MSG sequence reads from an F2 population, which were then used to make a genetic map for each of the 8 _Penstemon_ chromosomes. Then, I investigated other genomic elements including GC content and repeat element distribution. This repository holds the code used to complete this project, as well as my notes/instructions.
+  
+**Required software:** anaconda (msg_ipyrad, NumPy), bwa, samtools, BCFtools, java, python3, Lep-MAP3  
+**Required files:** picard.jar (attached), sequences/barcodes (multiplexed), pedigree
 
-## Demultiplex and Filter
+## Step 1: Demultiplex and Filter
 |||
 |-----|-----|
 |Starts with:|FASTQ (seq output), TXT (barcodes)|
@@ -35,7 +29,7 @@ ipyrad -c 1                             # print results (if you sbatch, these wi
 ipyrad -f                               # forces ipyrad to run steps, even if they have already been completed (applies when some data is missing)                         
 ```
 
-## Align to Reference Genome
+## Step 2: Align to Reference Genome
 |||
 |-----|-----|
 |Starts with:|FASTQ (one per ID), FASTA (ref genome)|
@@ -48,7 +42,7 @@ bwa index | bwa mem | java AddOrReplaceReadGroups | samtools view -b | samtools 
 ```
 samtools view -b                        # translates the SAM to BAM (binary)
 ```
-## Call Variants
+## Step 3: Call SNPs
 |||
 |-----|-----|
 |Starts with:|BAM (one per ID)|
@@ -70,7 +64,7 @@ bcftools call -m                         # use alterate model for multiallelic a
 bcftools -O v                            # output to uncompressed VCF
 ```
 
-## Additional Filtering
+## Step 4: Filter & ParentCall
 |||
 |-----|-----|
 |Starts with:|VCF, pedigree|
@@ -95,7 +89,7 @@ filter_bestsnp.py                                       # MinMinor = 1 (number o
 ParentCall2 removeNonInfomative=1                       # removes markers that are monomorphic or homozygous for both parents
 `````
 
-## Map
+## Step 5: Map
 |||
 |-----|-----|
 |Starts with:|filtered and parentcalled VCF|
