@@ -8,4 +8,4 @@
 **Required files:** picard.jar (attached), sequences/barcodes (multiplexed), pedigree
 
 A description of my workflow can be found in **project_steps_explained.md** above.  
-Custom scripts I used to filter, order, plot, and otherwise analyze the variant-called dataset are all included in **toolbox** (above). Code is seperated into modules for easy access.
+Custom scripts I used to filter, order, plot, and otherwise analyze the variant-called dataset are all included in **toolbox** (above).
