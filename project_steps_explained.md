@@ -1,5 +1,5 @@
 ## Demultiplex 
-*This process is specific to the way that we have been using ipyrad at KU, but the steps could be applied to similar projects and environments. Parameters were provided by Dr. Carrie Wessinger and Dr. Lena Hileman.*   
+*Parameters were provided by Dr. Carrie Wessinger and Dr. Lena Hileman.*   
 
 To start, we need a **raw fastq** file and a **barcode** file. 
 
@@ -102,7 +102,6 @@ This code utilizes the following flags:
 ipyrad ... -s 12                       # only complete steps 1 and 2 of ipyrad workflow (demultiplex, filter)
 ipyrad ... -c 1                        # print results (these will end up in a log file when using sbatch)
 ipyrad ... -f                          # forces ipyrad to run steps, even if they have already been completed (applies when some data is missing)      
-
 ```
 When the code is done, there are 2 new directories:
   
