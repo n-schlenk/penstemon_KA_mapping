@@ -13,7 +13,7 @@ scaffold_index   # index for defining characters in the scaffold titles (this wi
 To run any of the following scripts, use **FilterVCF(out_dir = "", nF2s = "", scaffold_index = "")** followed by **.ModuleName(module args)**.
 
 ### Module: MQADPAR
-Filter each SNP for MQ sccore, distribution, and parent genotypes.
+Filter each SNP for MQ sccore, distribution, and parent genotypes. Written by C. Wessinger and J. Kelly, modified by N. Schlenk.
 
 ```{}
 infile_path   # this is the VCF to be filtered 
@@ -23,7 +23,7 @@ minMQ         # minimum MQ score (default 30)
 ```
 
 ### Module: BestSNP
-This filter finds the best SNP per 150bp and filters for minor allele distribution.
+This filter finds the best SNP per 150bp and filters for minor allele distribution. Written by J. Kelly, modified by N. Schlenk.
 
 ```{}
 infile_path   # this is the VCF to be filtered
