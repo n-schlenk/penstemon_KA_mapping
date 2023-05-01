@@ -1,6 +1,7 @@
 ## Class: FilterVCF
 
 This is the code I used to filter SNPs down after variant calling (before final mapping).   
+Written by N. Schlenk unless otherwise stated.
 Scripts can be found in **toolbox** under class **FilterVCF**.
 
 The **FilterVCF** class has 3 arguments:
